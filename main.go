@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
-const VERSION string = "0.0.0"
+const VERSION string = "0.0.1"
 
 // getCol returns column number of the error line (TODO)
 func getCol(filename string, varName string) int {
@@ -63,5 +63,5 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Coverage: %.2f (%d/%d)\n", float64(noDescCnt)/float64(varNum), noDescCnt, varNum)
+	fmt.Printf("Coverage: %.2f (%d/%d)\n", float64(varNum-noDescCnt)/float64(varNum), varNum-noDescCnt, varNum)
 }

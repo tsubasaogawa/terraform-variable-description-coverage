@@ -26,5 +26,5 @@ variable "baz" {
 $ ./tfvdc .
 test.tf:1:1: variable `foo` does not have description
 test.tf:11:1: variable `baz` does not have description
-Coverage: 0.67 (2/3)
+Coverage: 0.33 (1/3)
 ```
