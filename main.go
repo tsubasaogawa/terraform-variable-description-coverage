@@ -4,6 +4,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
@@ -47,11 +48,20 @@ func main() {
 	}
 
 	module, _ := tfconfig.LoadModule(path)
+	varNum := len(module.Variables)
+	if varNum < 1 {
+		panic("No variable found")
+	}
+
+	noDescCnt := 0
 	for k, v := range module.Variables {
 		hasDescription := v.Description != ""
-		if hasDescription {
+		if !hasDescription {
 			msg := "variable `" + k + "` does not have description"
-			print(errorformat(v.Pos.Filename, v.Pos.Line, getCol(v.Pos.Filename, k), msg))
+			io.WriteString(os.Stderr, errorformat(v.Pos.Filename, v.Pos.Line, getCol(v.Pos.Filename, k), msg))
+			noDescCnt += 1
 		}
 	}
+
+	fmt.Printf("Coverage: %.2f (%d/%d)\n", float64(noDescCnt)/float64(varNum), noDescCnt, varNum)
 }
