@@ -1,4 +1,4 @@
-// main package is the main of tfmodblock.
+// main package is the main of tfvdc
 package main
 
 import (
@@ -9,21 +9,30 @@ import (
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 )
 
-// Variable is Terraform variable object.
-type Variable struct {
-	Name        string
-	Description string
-}
-
 const VERSION string = "0.0.0"
 
+// getCol returns column number of the error line (TODO)
+func getCol(filename string, varName string) int {
+	return 1
+}
+
+// errorformat returns `errorformat` style like https://github.com/reviewdog/errorformat
+func errorformat(filename string, line int, col int, msg string) string {
+	return fmt.Sprintf("%s:%d:%d: %s\n", filename, line, col, msg)
+}
+
+// main function
 func main() {
 	var (
-		v = flag.Bool("v", false, "tfvdc version")
+		varMode    = flag.Bool("v", true, "variable mode")
+		outputMode = flag.Bool("o", false, "output mode (TODO)")
+		version    = flag.Bool("version", false, "tfvdc version")
 	)
 	flag.Parse()
 
-	if *v {
+	if *varMode && *outputMode {
+		panic("Choose either `-v` (default) or `-o`")
+	} else if *version {
 		fmt.Println(VERSION)
 		os.Exit(0)
 	}
@@ -34,13 +43,15 @@ func main() {
 	}
 
 	if !tfconfig.IsModuleDir(path) {
-		panic("given path does not contain tf files")
+		panic("Given path does not contain tf files")
 	}
 
 	module, _ := tfconfig.LoadModule(path)
 	for k, v := range module.Variables {
 		hasDescription := v.Description != ""
-		fmt.Printf("%s: %t\n", k, hasDescription)
+		if hasDescription {
+			msg := "variable `" + k + "` does not have description"
+			print(errorformat(v.Pos.Filename, v.Pos.Line, getCol(v.Pos.Filename, k), msg))
+		}
 	}
-	// fmt.Println(block)
 }
